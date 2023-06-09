@@ -49,6 +49,7 @@ async function run() {
 
     const classesCollection=client.db("martialArts").collection("classes")
     const instructorsCollection=client.db("martialArts").collection("instructors")
+    const reviewsCollection=client.db("martialArts").collection("reviews")
 
     app.get("/instructors",async(req,res)=>{
         const result = await instructorsCollection.find().toArray();
@@ -57,6 +58,10 @@ async function run() {
 
 
     app.get("/classes",async(req,res)=>{
+        const result=await classesCollection.find().toArray();
+        res.send(result);
+    })
+    app.get("/reviews",async(req,res)=>{
         const result=await classesCollection.find().toArray();
         res.send(result);
     })
