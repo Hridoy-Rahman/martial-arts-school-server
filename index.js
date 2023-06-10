@@ -54,23 +54,49 @@ async function run() {
                 const selectedCollection = client.db("martialArts").collection("selectedClasses")
                 const userCollection = client.db("martialArts").collection("users")
 
+               
 
-                app.get('/users',async(req,res)=>{
-                    const result=await userCollection.find().toArray()
+                app.get('/users', async (req, res) => {
+                    const result = await userCollection.find().toArray()
                     res.send(result)
                 })
 
 
-                app.post('/users',async(req,res)=>{
-                    const user=req.body;
-                    const query={email:user.email}
-                    const existingUser=await userCollection.findOne(query);
-                    if(existingUser){
+                app.post('/users', async (req, res) => {
+                    const user = req.body;
+                    const query = { email: user.email }
+                    const existingUser = await userCollection.findOne(query);
+                    if (existingUser) {
                         return
                     }
                     const result = await userCollection.insertOne(user);
                     res.send(result);
 
+                })
+
+                app.patch('/users/admin/:id', async (req, res) => {
+                    const id = req.params.id;
+                    const filter = { _id: new ObjectId(id) };
+                    const updateUser = {
+                        $set: {
+                            role: 'admin'
+                        }
+                    }
+
+                    const result = await userCollection.updateOne(filter, updateUser);
+                    res.send(result)
+                })
+                app.patch('/users/instructor/:id', async (req, res) => {
+                    const id = req.params.id;
+                    const filter = { _id: new ObjectId(id) };
+                    const updateUser = {
+                        $set: {
+                            role: 'instructor'
+                        }
+                    }
+
+                    const result = await userCollection.updateOne(filter, updateUser);
+                    res.send(result)
                 })
 
                 app.get("/instructors", async (req, res) => {
@@ -110,16 +136,16 @@ async function run() {
                 });
 
                 app.delete('/selectedClasses/:_id', async (req, res) => {
-                        const id = req.params._id;
-                        const query= {_id: new ObjectId(id)}
-                        const result=await selectedCollection.deleteOne(query);
+                    const id = req.params._id;
+                    const query = { _id: new ObjectId(id) }
+                    const result = await selectedCollection.deleteOne(query);
 
-                        res.send(result);
-                    
+                    res.send(result);
+
                 });
 
 
-                
+
 
 
 
