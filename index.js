@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-require('dotenv').config()
+require('dotenv').config();
 
 const port = process.env.PORT || 5000;
 app.use(cors());
@@ -9,7 +9,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.SECRETE_KEY}@cluster0.ey6jdyf.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -52,6 +52,20 @@ async function run() {
                 const instructorsCollection = client.db("martialArts").collection("instructors")
                 const reviewsCollection = client.db("martialArts").collection("reviews")
                 const selectedCollection = client.db("martialArts").collection("selectedClasses")
+                const userCollection = client.db("martialArts").collection("users")
+
+
+                app.post('/users',async(req,res)=>{
+                    const user=req.body;
+                    const query={email:user.email}
+                    const existingUser=await userCollection.findOne(query);
+                    if(existingUser){
+                        return
+                    }
+                    const result = await userCollection.insertOne(user);
+                    res.send(result);
+
+                })
 
                 app.get("/instructors", async (req, res) => {
                     const result = await instructorsCollection.find().toArray();
@@ -70,12 +84,37 @@ async function run() {
                     res.send(result);
                 })
 
-                app.post('/selectedClasses', async(req, res) => {
-                        const selectedClass = req.body;
-                        const result = await selectedCollection.insertOne(selectedClass);
-                        res.json(result);
+                app.get('/selectedClasses', async (req, res) => {
+                    const user_email = req.query.user_email; // Get the user email from the query parameter
+
+                    try {
+                        const result = await selectedCollection.find({ user_email: user_email }).toArray();
+                        res.send(result);
+                    } catch (error) {
+                        console.error(error);
+                        res.status(500).send('Internal Server Error');
+                    }
+                });
+
+                app.post('/selectedClasses', async (req, res) => {
+                    const selectedClass = req.body;
+                    const result = await selectedCollection.insertOne(selectedClass);
+                    res.json(result);
+
+                });
+
+                app.delete('/selectedClasses/:_id', async (req, res) => {
+                        const id = req.params._id;
+                        const query= {_id: new ObjectId(id)}
+                        const result=await selectedCollection.deleteOne(query);
+
+                        res.send(result);
                     
                 });
+
+
+                
+
 
 
                 await client.db("admin").command({ ping: 1 });
