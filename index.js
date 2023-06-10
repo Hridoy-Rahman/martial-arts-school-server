@@ -53,6 +53,7 @@ async function run() {
                 const reviewsCollection = client.db("martialArts").collection("reviews")
                 const selectedCollection = client.db("martialArts").collection("selectedClasses")
                 const userCollection = client.db("martialArts").collection("users")
+                const paymentCollection = client.db("martialArts").collection("payment")
 
 
 
@@ -86,6 +87,7 @@ async function run() {
                     const result = await userCollection.updateOne(filter, updateUser);
                     res.send(result)
                 })
+
                 // app.patch('/users/instructor/:id', async (req, res) => {
                 //     const id = req.params.id;
                 //     const filter = { _id: new ObjectId(id) };
@@ -135,22 +137,41 @@ async function run() {
 
                 });
 
-                app.delete('/selectedClasses/:_id', async (req, res) => {
-                    const id = req.params._id;
-                    const query = { _id: new ObjectId(id) };
-                    const result = await selectedCollection.deleteOne(query);
+                app.delete('/selectedClasses/:id', async (req, res) => {
+                    const id = req.params.id
+                    console.log(id)
+                    const query = { _id: new ObjectId(id) }
+                    const result = await selectedCollection.deleteOne(query)
                     console.log(result)
-                    res.send(result);
-                  });
-
+                    res.send(result)
+                })
                 app.get('/users/:email', async (req, res) => {
                     const email = req.params.email;
                     const query = { email: email }
-                    const user = await userCollection.findOne(query);
+                    const user = await userCollection.findOne(query)
                     const result = { admin: user?.role === 'admin' }
                     res.send(result);
                 })
 
+
+                app.post('/payment', async (req, res) => {
+                    const paymentClass = req.body;
+                    const result = await paymentCollection.insertOne(paymentClass);
+                    res.send(result);
+
+                });
+
+                app.get('/payment', async (req, res) => {
+                    const user_email = req.query.user_email; 
+
+                    try {
+                        const result = await paymentCollection.find({ email: user_email }).toArray();
+                        res.send(result);
+                    } catch (error) {
+                        console.error(error);
+                        res.status(500).send('Internal Server Error');
+                    }
+                });
 
 
 
