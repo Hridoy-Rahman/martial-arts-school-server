@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 const port = process.env.PORT || 5000;
 app.use(cors());
@@ -54,7 +55,7 @@ async function run() {
                 const selectedCollection = client.db("martialArts").collection("selectedClasses")
                 const userCollection = client.db("martialArts").collection("users")
 
-               
+
 
                 app.get('/users', async (req, res) => {
                     const result = await userCollection.find().toArray()
@@ -143,6 +144,14 @@ async function run() {
                     res.send(result);
 
                 });
+
+                app.get('/users/:email', async (req, res) => {
+                    const email = req.params.email;
+                    const query = { email: email }
+                    const user = await userCollection.findOne(query);
+                    const result = { admin: user?.role === 'admin' }
+                    res.send(result);
+                })
 
 
 
