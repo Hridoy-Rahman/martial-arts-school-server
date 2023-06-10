@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -87,18 +86,18 @@ async function run() {
                     const result = await userCollection.updateOne(filter, updateUser);
                     res.send(result)
                 })
-                app.patch('/users/instructor/:id', async (req, res) => {
-                    const id = req.params.id;
-                    const filter = { _id: new ObjectId(id) };
-                    const updateUser = {
-                        $set: {
-                            role: 'instructor'
-                        }
-                    }
+                // app.patch('/users/instructor/:id', async (req, res) => {
+                //     const id = req.params.id;
+                //     const filter = { _id: new ObjectId(id) };
+                //     const updateUser = {
+                //         $set: {
+                //             role: 'instructor'
+                //         }
+                //     }
 
-                    const result = await userCollection.updateOne(filter, updateUser);
-                    res.send(result)
-                })
+                //     const result = await userCollection.updateOne(filter, updateUser);
+                //     res.send(result)
+                // })
 
                 app.get("/instructors", async (req, res) => {
                     const result = await instructorsCollection.find().toArray();
@@ -132,18 +131,17 @@ async function run() {
                 app.post('/selectedClasses', async (req, res) => {
                     const selectedClass = req.body;
                     const result = await selectedCollection.insertOne(selectedClass);
-                    res.json(result);
+                    res.send(result);
 
                 });
 
                 app.delete('/selectedClasses/:_id', async (req, res) => {
                     const id = req.params._id;
-                    const query = { _id: new ObjectId(id) }
+                    const query = { _id: new ObjectId(id) };
                     const result = await selectedCollection.deleteOne(query);
-
+                    console.log(result)
                     res.send(result);
-
-                });
+                  });
 
                 app.get('/users/:email', async (req, res) => {
                     const email = req.params.email;
